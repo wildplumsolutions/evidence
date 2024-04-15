@@ -10,12 +10,22 @@ This demo [connects](/settings) to a local CSV file.
 
 ### Passenger Port of Embarkation
 
+<script>
+    let myColors = [
+        '#cf0d06',
+        '#eb5752',
+        '#e88a87',
+        '#fcdad9',
+    ]
+</script>
+
 <BarChart 
   data={t_embarked} 
   x=PortofEmbarkation
   y=number_of_passengers 
-  fillColor="#488f96"
   sort=false
+  colorPalette={myColors}
+  labels=true
 >
 </BarChart>
 
@@ -31,9 +41,10 @@ Total Passengers embarked {inputs.ports.value} are **<Value data={t_class} colum
   data={t_class} 
   x=PassengerClass
   y=number_of_passengers 
-  fillColor="#488f96"
+  colorPalette={myColors}
   sort=false
   title="Passenger Class - {inputs.ports.value}"
+  labels=true
 >
 </BarChart>
 
@@ -41,8 +52,11 @@ Total Passengers embarked {inputs.ports.value} are **<Value data={t_class} colum
   data={t_passenger} 
   x=passenger
   y=number_of_passengers 
-  fillColor="#488f96"
+  colorPalette={myColors}
   title="Passenger - {inputs.ports.value}"
+  series=passenger_alone
+  legend=true
+  labels=true
 >
 </BarChart>
 
@@ -50,15 +64,31 @@ Total Passengers embarked {inputs.ports.value} are **<Value data={t_class} colum
 
 Total Passengers survived {inputs.ports.value} are **<Value data={t_class} column=total_number_of_passengers/>**.
 
-<BarChart 
+<!-- <BarChart 
   data={t_survived} 
   x=survived
   y=number_of_passengers 
-  fillColor="#488f96"
+  colorPalette={myColors}
   sort=false
   title="Passengers Survived from - {inputs.ports.value}"
 >
-</BarChart>
+</BarChart> -->
+
+<ECharts config={
+    {
+        tooltip: {
+            formatter: '{b}: {c} ({d}%)'
+        },
+      series: [
+        {
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: [...t_survived],
+        }
+      ]
+      }
+    }
+/>
 
 <Heatmap 
     data={t_survived_age} 
@@ -101,8 +131,10 @@ order by 1 ASC
 
 ```sql t_passenger
 select
-  who as passenger,
-  count(*) as number_of_passengers
+  who as passenger
+  , case when alone = TRUE then 'Alone'
+      else 'Group' end as passenger_alone
+  , count(*) as number_of_passengers
 from titanic
 where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
     else case when case when embarked like 'C' then 'Cherbourg'
@@ -110,14 +142,14 @@ where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
                         else 'Southampton' end like '${inputs.ports.value}' then 'Y'
           else 'N' end
     end = 'Y'
-group by 1 
+group by 1, 2
 order by 1 desc
 ```
 
 ```sql t_survived
 select
-  case when survived = 1 then 'Yes' else 'No' end as survived
-  , count(*) as number_of_passengers
+  case when survived = 1 then 'Yes' else 'No' end as name
+  , count(*) as value
 from titanic
 where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
     else case when case when embarked like 'C' then 'Cherbourg'
@@ -142,7 +174,7 @@ select
       when age between 81 and 90 then '81-90'
       when age between 91 and 100 then '91-100'
       when age > 100 then '100+'
-      else 'Error'
+      else 'No Age Given'
       end as age
   , case when survived = 1 then 'Yes' else 'No' end as survived
   , count(*) as number_of_passengers
@@ -156,3 +188,15 @@ where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
 group by 1, 2
 order by 1 desc
 ```
+
+
+```sql donut_query
+select 'Glazed' as name, 213 as value
+union all
+select 'Cruller' as name, 442 as value
+union all
+select 'Jelly-filled' as name, 321 as value
+union all
+select 'Cream-filled' as name, 350 as value
+```
+
