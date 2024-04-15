@@ -12,10 +12,11 @@ This demo [connects](/settings) to a local CSV file.
 
 <script>
     let myColors = [
-        '#cf0d06',
-        '#eb5752',
-        '#e88a87',
-        '#fcdad9',
+        '#003f5c',
+        '#007188',
+        '#00a696',
+        '#63d786',
+        '#e4ff6e',
     ]
 </script>
 
@@ -64,16 +65,6 @@ Total Passengers embarked {inputs.ports.value} are **<Value data={t_class} colum
 
 Total Passengers survived {inputs.ports.value} are **<Value data={t_class} column=total_number_of_passengers/>**.
 
-<!-- <BarChart 
-  data={t_survived} 
-  x=survived
-  y=number_of_passengers 
-  colorPalette={myColors}
-  sort=false
-  title="Passengers Survived from - {inputs.ports.value}"
->
-</BarChart> -->
-
 <ECharts config={
     {
         tooltip: {
@@ -84,6 +75,13 @@ Total Passengers survived {inputs.ports.value} are **<Value data={t_class} colum
           type: 'pie',
           radius: ['40%', '70%'],
           data: [...t_survived],
+          color: [
+              '#003f5c',
+              '#007188',
+              '#00a696',
+              '#63d786',
+              '#e4ff6e',
+      ]
         }
       ]
       }
@@ -96,6 +94,7 @@ Total Passengers survived {inputs.ports.value} are **<Value data={t_class} colum
     y=age 
     value=number_of_passengers 
     valueFmt="#"
+    colorPalette={myColors}
     title="Passengers Age from - {inputs.ports.value}"
 />
 
