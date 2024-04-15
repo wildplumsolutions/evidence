@@ -63,7 +63,7 @@ Total Passengers embarked {inputs.ports.value} are **<Value data={t_class} colum
 
 ### Survival Breakdown
 
-Total Passengers survived {inputs.ports.value} are **<Value data={t_class} column=total_number_of_passengers/>**.
+Total Passengers survived {inputs.ports.value} are **<Value data={t_survived} column=value/>**.
 
 <ECharts config={
     {
@@ -88,14 +88,28 @@ Total Passengers survived {inputs.ports.value} are **<Value data={t_class} colum
     }
 />
 
+<BarChart 
+  data={t_survived_by_class} 
+  x=PassengerClass
+  y=survival_rate 
+  colorPalette={myColors}
+  title="Passenger Survival Chance by Class - {inputs.ports.value}"
+  labels=true
+  series=group 
+  type=grouped
+  yFmt="#.00%"
+  swapXY=true
+>
+</BarChart>
+
 <Heatmap 
     data={t_survived_age} 
     x=survived 
     y=age 
-    value=number_of_passengers 
-    valueFmt="#"
+    value=survival_rate 
+    valueFmt="#.00%"
     colorPalette={myColors}
-    title="Passengers Age from - {inputs.ports.value}"
+    title="Passengers Survival Chance by Age - {inputs.ports.value}"
 />
 
 ```sql t_embarked
@@ -160,6 +174,39 @@ group by 1
 order by 1 desc
 ```
 
+```sql t_survived_by_class
+select
+  case when class like 'First' then '1st'
+      when class like 'Second' then '2nd'
+      else '3rd' end as 'PassengerClass'
+  , 'survival_rate_class' as 'group'
+  , (SUM(survived) / count(*)) as survival_rate
+from titanic
+where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
+    else case when case when embarked like 'C' then 'Cherbourg'
+                        when embarked like 'Q' then 'Queenstown'
+                        else 'Southampton' end like '${inputs.ports.value}' then 'Y'
+          else 'N' end
+    end = 'Y'
+group by 1
+UNION
+select
+  case when class like 'First' then '1st'
+      when class like 'Second' then '2nd'
+      else '3rd' end as 'PassengerClass'
+  , 'survival_rate_total' as 'group'
+  , (SUM(survived) / SUM(COUNT(*)) OVER()) as survival_rate
+from titanic
+where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
+    else case when case when embarked like 'C' then 'Cherbourg'
+                        when embarked like 'Q' then 'Queenstown'
+                        else 'Southampton' end like '${inputs.ports.value}' then 'Y'
+          else 'N' end
+    end = 'Y'
+group by 1
+order by 1 asc
+```
+
 ```sql t_survived_age
 select
   case when age between 0 and 10 then '0-10'
@@ -175,8 +222,8 @@ select
       when age > 100 then '100+'
       else 'No Age Given'
       end as age
-  , case when survived = 1 then 'Yes' else 'No' end as survived
-  , count(*) as number_of_passengers
+  , case when survived = 1 then 'Survived' else 'No' end as survived
+  , (SUM(survived) / SUM(COUNT(*)) OVER()) as survival_rate
 from titanic
 where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
     else case when case when embarked like 'C' then 'Cherbourg'
@@ -184,18 +231,7 @@ where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
                         else 'Southampton' end like '${inputs.ports.value}' then 'Y'
           else 'N' end
     end = 'Y'
+      and survived = 1
 group by 1, 2
 order by 1 desc
 ```
-
-
-```sql donut_query
-select 'Glazed' as name, 213 as value
-union all
-select 'Cruller' as name, 442 as value
-union all
-select 'Jelly-filled' as name, 321 as value
-union all
-select 'Cream-filled' as name, 350 as value
-```
-
