@@ -132,7 +132,20 @@ order by 1 desc
 ```sql t_survived_age
 select
   case when survived = 1 then 'Yes' else 'No' end as survived
-  , round(age,0) as age
+  -- , round(age,0) as age
+  , case when age between 0 and 10 then '0-10'
+      when age between 11 and 20 then '11-20'
+      when age between 21 and 30 then '21-30'
+      when age between 31 and 40 then '31-40'
+      when age between 41 and 50 then '41-50'
+      when age between 51 and 60 then '51-60'
+      when age between 61 and 70 then '61-70'
+      when age between 71 and 80 then '71-80'
+      when age between 81 and 90 then '81-90'
+      when age between 91 and 100 then '91-100'
+      when age > 100 then '100+'
+      else 'Error'
+      end as age
   , count(*) as number_of_passengers
 from titanic
 where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
