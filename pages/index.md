@@ -112,7 +112,7 @@ Total Passengers survived {inputs.ports.value} are **<Value data={t_survived} co
     title="Passengers Survival Chance by Age - {inputs.ports.value}"
 />
 
-### Summary
+## Summary
 
 {#if t_survived_by_class_result.PassengerClass = '1st'}
 
@@ -123,6 +123,14 @@ Pays to be rich, with a avgerage survival rate of <Value data={t_survived_by_cla
 Sometimes pays not to be rich, with a avgerage survival rate of <Value data={t_survived_by_class_result} column=AverageRateOfSurvival fmt="#.00%"/>
 
 {/if}
+
+
+
+#### Created By
+
+[Wild Plum Solutions](https://www.wildplumsolutions.co.uk/)
+
+![Logo](/wps-logo.png)
 
 ```sql t_embarked
 select
