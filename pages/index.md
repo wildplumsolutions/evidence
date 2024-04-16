@@ -112,6 +112,18 @@ Total Passengers survived {inputs.ports.value} are **<Value data={t_survived} co
     title="Passengers Survival Chance by Age - {inputs.ports.value}"
 />
 
+### Summary
+
+{#if t_survived_by_class_result.PassengerClass = '1st'}
+
+Pays to be rich, with a avgerage survival rate of <Value data={t_survived_by_class_result} column=AverageRateOfSurvival fmt="#.00%"/>
+
+{:else }
+
+Sometimes pays not to be rich, with a avgerage survival rate of <Value data={t_survived_by_class_result} column=AverageRateOfSurvival fmt="#.00%"/>
+
+{/if}
+
 ```sql t_embarked
 select
   case when embarked like 'C' then 'Cherbourg'
@@ -205,6 +217,45 @@ where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
     end = 'Y'
 group by 1
 order by 1 asc
+```
+
+```sql t_survived_by_class_result
+  select t1.PassengerClass
+      , AVG(survival_rate) as 'AverageRateOfSurvival'
+  from (
+    select
+    case when class like 'First' then '1st'
+        when class like 'Second' then '2nd'
+        else '3rd' end as 'PassengerClass'
+    , 'survival_rate_class' as 'group'
+    , (SUM(survived) / count(*)) as survival_rate
+  from titanic
+  where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
+      else case when case when embarked like 'C' then 'Cherbourg'
+                          when embarked like 'Q' then 'Queenstown'
+                          else 'Southampton' end like '${inputs.ports.value}' then 'Y'
+            else 'N' end
+      end = 'Y'
+  group by 1
+  UNION
+  select
+    case when class like 'First' then '1st'
+        when class like 'Second' then '2nd'
+        else '3rd' end as 'PassengerClass'
+    , 'survival_rate_total' as 'group'
+    , (SUM(survived) / SUM(COUNT(*)) OVER()) as survival_rate
+  from titanic
+  where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
+      else case when case when embarked like 'C' then 'Cherbourg'
+                          when embarked like 'Q' then 'Queenstown'
+                          else 'Southampton' end like '${inputs.ports.value}' then 'Y'
+            else 'N' end
+      end = 'Y'
+  group by 1
+)t1
+group by 1
+order by 2 desc
+limit 1
 ```
 
 ```sql t_survived_age
