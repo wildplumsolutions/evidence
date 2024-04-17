@@ -130,8 +130,6 @@ Sometimes pays not to be rich, with a avgerage survival rate of <Value data={t_s
 
 [Wild Plum Solutions](https://www.wildplumsolutions.co.uk/)
 
-![Logo](/wps-logo.png)
-
 ```sql t_embarked
 select
   case when embarked like 'C' then 'Cherbourg'
