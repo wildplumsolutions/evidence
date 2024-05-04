@@ -292,3 +292,8 @@ where case when '${inputs.ports.value}' like 'All Ports' then 'Y'
 group by 1, 2
 order by 1 desc
 ```
+```sql t_mots
+select
+  *
+from mots
+```

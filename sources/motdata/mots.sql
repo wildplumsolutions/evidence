@@ -1,0 +1,1 @@
+select * from mot_count;
